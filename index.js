@@ -7,6 +7,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const gravity = 10; // gravity not working rn bruh
+
 class Player {
     constructor() {
         this.position = {
@@ -26,7 +27,7 @@ class Player {
         this.currSpeedY = 0;
 
         
-        this.xAccel = 0.35;
+        this.xAccel = 0.4;
         this.yAccel = 0.1;
         this.strength = 50; // strength of jump
     }
@@ -41,9 +42,12 @@ class Player {
     update() {
         // implement slew rates for fall.
         this.currSpeedY = this.slewRateY(this.currSpeedY);
-        console.log(this.currSpeedY);
+        // console.log(this.currSpeedY);
         if (!this.touchingBottom()) {
             this.position.y += this.currSpeedY;
+        }
+        else {
+            this.currSpeedY = 0;
         }
         this.draw();
     }
@@ -53,19 +57,20 @@ class Player {
             case "left":
                 console.log("left");
                 this.currSpeedX = this.slewRateX(this.currSpeedX);
-                console.log(this.currSpeedX);
+                // console.log(this.currSpeedX);
                 this.position.x -= this.currSpeedX;
-                console.log(this.getStats());
+                // console.log(this.getStats());
                 break;
             case "right":
                 console.log("right");
                 this.currSpeedX = this.slewRateX(this.currSpeedX);
-                console.log(this.currSpeedX);
+                // console.log(this.currSpeedX);
                 this.position.x += this.currSpeedX;
-                console.log(this.getStats());
+                // console.log(this.getStats());
                 break;
             case "up":
                 this.position.y -= this.strength;
+                console.log("up: " + this.position.y);
                 break;
         }
     }
@@ -73,16 +78,13 @@ class Player {
     moveSlip(dir) {
         switch(dir) {
             case "left":
-                while(this.currSpeedX < 0) {
-                    this.currSpeedX -= this.xAccel;
-                    this.position.x -= this.currSpeedX;
-                    // await sleep(10);
-                }
+                console.log("left release")
+                this.currSpeedX = this.slewRateSlideX(this.currSpeedX);
+                this.position.x -= this.currSpeedX;
             case "right":
-                while(this.currSpeedX > 0) {
-                    this.currSpeedX -= this.xAccel;
-                    this.position.x += this.currSpeedX;
-                }
+                console.log("right release")
+                this.currSpeedX = this.slewRateSlideX(this.currSpeedX);
+                this.position.x += this.currSpeedX;
 
         }
     }
@@ -94,6 +96,10 @@ class Player {
         return clamp(speed + this.yAccel, 1, this.vel.y); // horiz
     }
 
+    slewRateSlideX(speed) {
+        return clamp(speed - this.xAccel, 1, this.vel.y); // horiz
+    }
+
     resetSpeedX() {
         this.currSpeedX = 0;
     }
@@ -103,9 +109,11 @@ class Player {
     }
 
     touchingBottom() {
-        if (this.position.y + this.h <= canvas.height) {
+        if (this.position.y + this.h + this.currSpeedY < canvas.height) {
             return false;
         }
+        this.position.y = canvas.height - this.h;
+        this.currSpeed = 0;
         return true;
     }
 }
@@ -118,7 +126,17 @@ function sleep(ms) {
 
 const player = new Player();
 
-
+const keys = {
+    right: {
+        pressed: false
+    },
+    left: {
+        pressed: false
+    },
+    space: {
+        pressed: false
+    }
+}
 function animate() {   
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height); // clear canvas.
@@ -130,22 +148,23 @@ animate();
 
 addEventListener('keydown', (event) => {
     // console.log(code);
-    console.log(event);
-    console.log(event.code);
+    // console.log(event);
+    // console.log(event.code);
 
     if (player.touchingBottom()) {
         switch(event.code) {
-            case 'KeyA':
-                // left (a)
-                player.move("left");
+            case "KeyA":
+                keys.left.pressed = true;
                 break;
-            case 'KeyD':
-                player.move("right");
+            case "KeyD":
+                keys.right.pressed = true;
                 break;
-            case 'Space':
-                player.move("up");
+            case "Space":
                 break;
         }
+        if(event.code == 'KeyA') { player.move("left"); }
+        if(event.code == 'KeyD') { player.move("right"); }
+        if(event.code == 'Space') { player.move("up"); }    
     }
     
 })
@@ -154,15 +173,17 @@ addEventListener('keyup', (event) => {
     switch(event.code) {
         case 'KeyA':
             // left (a)
-            // player.moveSlip("left"); // implement this.
+            keys.left.pressed = false;
+            player.moveSlip("left"); // implement this.
+            console.log("released lol")
+            
             player.resetSpeedX();
             break;
         case 'KeyD':
-            // player.moveSlip("right");
+            player.moveSlip("right");
+            console.log("released lol")
+            
             player.resetSpeedX();
-            break;
-        case 'Space':
-            // player.resetSpeed();
             break;
     }
 })
