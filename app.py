@@ -6,7 +6,7 @@ import json
 app = Flask(__name__)
 
 cors = CORS(app)
-
+import time
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 @app.route("/", methods = ['POST', 'GET'])
@@ -19,7 +19,7 @@ def func():
         print(data[0].get("what's up"))
         otherdata = jsonify(data)
         # print("data:")
-        
+        print("returning...")
         
         return otherdata
     print('what')
@@ -27,3 +27,4 @@ def func():
 
 if __name__ == "__main__":
  app.run(debug = True)
+
