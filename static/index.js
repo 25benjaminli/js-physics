@@ -35,7 +35,7 @@ class Object {
     };
 
     this.vel = {
-      x: 5, // max speed
+      x: 7, // max speed
       y: 500, // max strength of jump
     };
 
@@ -158,10 +158,6 @@ class Object {
     return true;
   }
 
-  hide() {
-    this.shouldDraw = false;
-  }
-
   getPos() {
     return { xPos: this.position.x, yPos: this.position.y };
   }
@@ -173,7 +169,7 @@ class Object {
   // overlap between two objects
   isColliding(otherObj) {
     // console.log(this.position.x + this.w);
-    // console.log(otherObj.position.x);
+    // console.log(otherthis.position.x);
     const ax1 = this.position.x; // bottom left
     const ay1 = this.position.y + this.h; // bottom left
     const ax2 = this.position.x + this.w; // top 
@@ -191,37 +187,19 @@ class Object {
       ay1 <= by1 &&
       ay1 > by2
     ) {
-      console.log("colliding");
+      // console.log("colliding");
       return true;
     }
-    console.log("not colliding");
+    // console.log("not colliding");
 
     return false;
   }
 
-  isColliding2(otherObj) {
-    const ax1 = this.position.x; // bottom left
-    const ay1 = this.position.y + this.h; // bottom left
-    const ax2 = this.position.x + this.w; // top 
-    const ay2 = this.position.y;
-
-    const bx1 = otherObj.position.x; // bottom left
-    const by1 = otherObj.position.y + otherObj.h;
-    const bx2 = otherObj.position.x + otherObj.w;
-    const by2 = otherObj.position.y;
-
-    // check for overlap
-    if (
-      ax1 < bx2 &&
-      ax2 > bx1 &&
-      ay1 < by2 &&
-      ay2 > by1
-    ) {
-      console.log("collision");
-      return true;
-    } else {
-      return false;
-    }
+  hide() {
+    this.position.x = 10000;
+    this.position.y = 10000;
+    this.shouldDraw = false;
+  }
 
 
     // const x_overlap = Math.max(0, (Math.min(bx2, ax2) - Math.max(bx1, ax1)));
@@ -241,7 +219,6 @@ class Object {
 
     // return x_overlap > 0 && y_overlap > 0;
 
-  }
 }
 
 class Mob extends Object {
@@ -279,6 +256,7 @@ class Treasure extends Object {
       y: yThing,
     };
     this.collected = false;
+    
   }
 
   draw() {
@@ -287,35 +265,50 @@ class Treasure extends Object {
   }
 
   collect() {
+    if(!this.collected) {
     console.log("SDKLFJKLDFSJLKSD: " + this.position.x);
     if (this.isShown()) {
       this.collected = true;
       this.displayCollected();
     }
-    // setTimeout(this.deleteText, 1000); // why doesn't timeout work??
 
-    this.deleteText();
-    this.hide();
+    console.log("this is: ");
+    console.log(this);
+
+    // arrow function to keep the context of "this" when calling from somewhere else (e.g. window)
+
+    setTimeout(() => {
+      this.deleteText();
+    }, 1000); // why doesn't timeout work??
+
+    // this.deleteText();
+    setTimeout(() =>{
+      this.hide();
+    }, 3000);
+  }
+  }
+
+  sayHi() {
+    console.log("hi");
   }
 
   displayCollected() {
     if (this.collected) {
+      c.fillStyle = 'black';
       c.fillText("collected!", this.position.x + (this.w / 4), this.position.y - 50);
     }
   }
 
   deleteText() {
-    console.log("hi");
+    console.log("hey, it was deleted.");
     const x = this.position.x; // fix this - why isn't position accessed here?
+    
     const y = this.position.y;
 
-    console.log("asdasdf" + x);
-    console.log("adsfadsky" + y);
-
     console.log("clearing");
+    // delete text not really working right now lol
 
-    c.fillStyle = 'white';
-    c.fillRect(this.position.x + (this.w / 4), this.position.y - 50, 100, 100);
+  
   }
 
   update() {
@@ -344,6 +337,8 @@ class Player extends Object {
     super.update();
     this.displayHealth();
   }
+
+
 }
 
 function sleep(ms) {
@@ -391,7 +386,7 @@ function animate() {
 
 function dostuff(treasure) {
   if (player.isColliding(treasure)) {
-    // treasure.collect();
+    treasure.collect();
   }
 }
 
